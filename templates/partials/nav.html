@@ -1,0 +1,9 @@
+<nav aria-label="Research categories">
+  <a href="/runs/{{ run.id }}" class="{{ 'active' if active == 'overview' else '' }}" {% if active == 'overview' %}aria-current="page"{% endif %}>Overview</a>
+  <a href="/runs/{{ run.id }}/category/domains" class="{{ 'active' if active == 'domains' else '' }}" {% if active == 'domains' %}aria-current="page"{% endif %}>Domains &amp; Subdomains{% if counts %} <span class="count">{{ counts.domains }}</span>{% endif %}</a>
+  <a href="/runs/{{ run.id }}/category/web_presence" class="{{ 'active' if active == 'web_presence' else '' }}" {% if active == 'web_presence' %}aria-current="page"{% endif %}>Web Presence{% if counts %} <span class="count">{{ counts.web_presence }}</span>{% endif %}</a>
+  <a href="/runs/{{ run.id }}/category/people" class="{{ 'active' if active == 'people' else '' }}" {% if active == 'people' %}aria-current="page"{% endif %}>People &amp; Organization{% if counts %} <span class="count">{{ counts.people }}</span>{% endif %}</a>
+  <a href="/runs/{{ run.id }}/category/documents" class="{{ 'active' if active == 'documents' else '' }}" {% if active == 'documents' %}aria-current="page"{% endif %}>Public Documents{% if counts %} <span class="count">{{ counts.documents }}</span>{% endif %}</a>
+  <a href="/runs/{{ run.id }}/category/dns_network" class="{{ 'active' if active == 'dns_network' else '' }}" {% if active == 'dns_network' %}aria-current="page"{% endif %}>DNS &amp; Network Context{% if counts %} <span class="count">{{ counts.dns_network }}</span>{% endif %}</a>
+  <a href="/runs/{{ run.id }}/changes" class="{{ 'active' if active == 'changes' else '' }}" {% if active == 'changes' %}aria-current="page"{% endif %}>Changes</a>
+</nav>

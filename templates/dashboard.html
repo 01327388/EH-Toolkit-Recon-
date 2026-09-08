@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ organization.name }} — EthicalHawk Recon{% endblock %}
+{% block body %}
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="org-name">
+      <strong>{{ organization.name }}</strong>
+      <span>{{ organization.primary_domain or "No confirmed domain" }}</span>
+    </div>
+    {% set active = "overview" %}
+    {% include "partials/nav.html" with context %}
+  </aside>
+  <div class="main-content">
+    <div class="toolbar" style="justify-content: space-between;">
+      <div>
+        <span class="badge {{ 'badge-orange' if run.mode.value == 'authorized_passive' else 'badge-muted' }}">
+          {{ "Authorized Passive Recon" if run.mode.value == "authorized_passive" else "Public Profile" }}
+        </span>
+        {% include "partials/run_status.html" %}
+      </div>
+      <a class="btn secondary small" href="/runs/{{ run.id }}/changes">View changes</a>
+    </div>
+
+    {% if run.mode.value == "public_profile" %}
+      <div class="notice-banner">Public Profile mode is informational and does not establish permission for testing.</div>
+    {% endif %}
+
+    {% if failed_sources %}
+      <div class="notice-banner">Incomplete source coverage: {{ failed_sources | join(", ") }} could not be reached this run.</div>
+    {% endif %}
+
+    <div class="summary-grid">
+      {% for cat, label in category_labels.items() %}
+      <a class="summary-tile" href="/runs/{{ run.id }}/category/{{ cat.value }}" style="text-decoration:none; color:inherit; display:block;">
+        <div class="num">{{ counts[cat.value] }}</div>
+        <div class="label">{{ label }}</div>
+      </a>
+      {% endfor %}
+    </div>
+
+    {% if changes_preview %}
+    <div class="card">
+      <h2>Recent changes</h2>
+      {% for entry in changes_preview %}
+        <div class="result-card diff-{{ entry.status }}">
+          <span class="badge {{ 'badge-success' if entry.status == 'added' else ('badge-error' if entry.status == 'removed' else 'badge-orange') }}">{{ entry.status }}</span>
+          {{ (entry.current or entry.previous).title }}
+        </div>
+      {% endfor %}
+      <a href="/runs/{{ run.id }}/changes">See full comparison &rarr;</a>
+    </div>
+    {% elif has_previous_run %}
+    <div class="card"><p class="lead">No material changes since the previous run.</p></div>
+    {% endif %}
+
+    <div class="card">
+      <h2>Recent results</h2>
+      {% if run.status.value == "pending" or run.status.value == "running" %}
+        <div class="empty-state"><p>Collecting permitted public information&hellip; this page updates automatically.</p></div>
+      {% elif not recent_results %}
+        <div class="empty-state"><p>No results were found from permitted public sources for this organization yet.</p></div>
+      {% else %}
+        {% for r in recent_results %}
+        <div class="result-card">
+          <strong>{{ r.title }}</strong>
+          <div class="meta">
+            <span>{{ category_labels[r.category] }}</span>
+            <span>Source: {{ r.source_name }}</span>
+            <span>Discovered {{ r.discovered_at.strftime('%Y-%m-%d %H:%M') }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Analyst notes</h2>
+      {% for note in run.notes %}
+        <div class="result-card"><div class="meta"><span>{{ note.created_at.strftime('%Y-%m-%d %H:%M') }}</span></div>{{ note.body }}</div>
+      {% else %}
+        <p class="lead">No notes yet.</p>
+      {% endfor %}
+      <form method="post" action="/runs/{{ run.id }}/notes">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <div class="field">
+          <label for="body" class="visually-hidden">Add a note</label>
+          <textarea id="body" name="body" placeholder="Add a text-only note about this run..." required maxlength="4000"></textarea>
+        </div>
+        <button class="btn secondary small" type="submit">Add note</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Start research — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="container narrow">
+  <h1>{{ organization.name }}</h1>
+  <p class="lead">{{ organization.primary_domain or "No confirmed domain" }}</p>
+
+  <div class="card">
+    <form method="post" action="/runs" id="run-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="organization_id" value="{{ organization.id }}">
+
+      <fieldset>
+        <legend>Access mode</legend>
+        <label class="radio-option">
+          <input type="radio" name="mode" value="public_profile" checked onchange="document.getElementById('ack-fields').hidden = true">
+          <span>
+            <strong>Public Profile</strong>
+            <span class="desc">Conservative, high-level information only. No acknowledgement required. Informational only — does not establish permission for testing.</span>
+          </span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="mode" value="authorized_passive" onchange="document.getElementById('ack-fields').hidden = false">
+          <span>
+            <strong>Authorized Passive Recon</strong>
+            <span class="desc">Fuller passive results across all categories. Requires an authorization acknowledgement, which is recorded in the audit log.</span>
+          </span>
+        </label>
+      </fieldset>
+
+      <div id="ack-fields" hidden>
+        <div class="field">
+          <label for="purpose">Authorization &amp; purpose</label>
+          <textarea id="purpose" name="purpose" placeholder="Describe your authorization to assess this organization and the purpose of this run (e.g. engagement reference, client authorization)."></textarea>
+          <p class="field-hint">This is a product control, not legal advice or a substitute for contractual permission. It is recorded with your account, the target, and the time.</p>
+        </div>
+      </div>
+
+      <button class="btn" type="submit">Start research</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

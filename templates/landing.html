@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Search — EthicalHawk Recon{% endblock %}
+{% block content %}
+<div class="container narrow">
+  <h1>Research an organization</h1>
+  <p class="lead">Start with a company name. You'll confirm the exact organization before anything is collected.</p>
+
+  {% include "partials/flash.html" %}
+
+  <div class="card">
+    <form method="post" action="/search">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="field">
+        <label for="query">Company name</label>
+        <input type="text" id="query" name="query" placeholder="e.g. Acme Corporation" required minlength="2" maxlength="120" autofocus>
+      </div>
+      <button class="btn" type="submit">Search</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Two access modes</h2>
+    <p><span class="badge badge-muted">Public Profile</span> A conservative, informational profile from low-risk public sources. No authorization required. This does not establish permission to test anything.</p>
+    <p><span class="badge badge-orange">Authorized Passive Recon</span> Fuller passive results. Requires you to acknowledge you are authorized to assess the organization before it becomes available.</p>
+    <p class="field-hint">EthicalHawk Recon only collects permitted, publicly available information. It never scans, probes, authenticates to, or exploits target systems.</p>
+  </div>
+
+  {% if recent_runs %}
+  <div class="card">
+    <h2>Recent runs</h2>
+    <table>
+      <thead><tr><th>Organization</th><th>Mode</th><th>Status</th><th>Started</th><th></th></tr></thead>
+      <tbody>
+        {% for run in recent_runs %}
+        <tr>
+          <td>{{ run.organization.name }}</td>
+          <td>{{ "Authorized Passive" if run.mode.value == "authorized_passive" else "Public Profile" }}</td>
+          <td><span class="badge {{ 'badge-success' if run.status.value == 'completed' else ('badge-error' if run.status.value == 'failed' else 'badge-muted') }}">{{ run.status.value }}</span></td>
+          <td>{{ run.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td><a href="/runs/{{ run.id }}">Open</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

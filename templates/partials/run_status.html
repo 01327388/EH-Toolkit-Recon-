@@ -1,0 +1,12 @@
+<span id="run-status-badge"
+  {% if run.status.value in ("pending", "running") %}hx-get="/runs/{{ run.id }}/status" hx-trigger="load, every 3s" hx-swap="outerHTML"{% endif %}>
+  {% if run.status.value == "pending" %}
+    <span class="badge badge-muted">Queued</span>
+  {% elif run.status.value == "running" %}
+    <span class="badge badge-orange">Collecting…</span>
+  {% elif run.status.value == "completed" %}
+    <span class="badge badge-success">Completed {{ run.completed_at.strftime('%Y-%m-%d %H:%M') if run.completed_at }}</span>
+  {% else %}
+    <span class="badge badge-error">Failed{% if run.error_message %} — {{ run.error_message }}{% endif %}</span>
+  {% endif %}
+</span>

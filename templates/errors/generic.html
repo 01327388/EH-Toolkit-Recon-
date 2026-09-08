@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ status_code }} — EthicalHawk Recon{% endblock %}
+{% block content %}
+<div class="container narrow">
+  <div class="card empty-state">
+    <h1>{{ status_code }}</h1>
+    <p>{{ message }}</p>
+    <a class="btn secondary" href="/">Back to search</a>
+  </div>
+</div>
+{% endblock %}

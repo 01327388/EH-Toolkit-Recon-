@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}EthicalHawk Recon{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/"><span class="dot" aria-hidden="true"></span> EthicalHawk Recon</a>
+    <div class="header-actions">
+      {% if user %}
+        <a href="/runs">Saved runs</a>
+        {% if user.role.value == "administrator" %}<a href="/admin">Admin</a>{% endif %}
+        <span>{{ user.email }}</span>
+        <form method="post" action="/auth/logout">
+          <button class="btn secondary small" type="submit">Sign out</button>
+        </form>
+      {% else %}
+        <a href="/auth/login">Sign in</a>
+      {% endif %}
+    </div>
+  </header>
+  {% block body %}
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  {% endblock %}
+</body>
+</html>

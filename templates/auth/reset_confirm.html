@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Choose a new password — EthicalHawk Recon{% endblock %}
+{% block content %}
+<div class="container narrow">
+  <h1>Choose a new password</h1>
+  {% include "partials/flash.html" %}
+  <div class="card">
+    <form method="post" action="/auth/reset/confirm/{{ token }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="field">
+        <label for="password">New password</label>
+        <input type="password" id="password" name="password" required minlength="10" autocomplete="new-password" autofocus>
+      </div>
+      <div class="field">
+        <label for="confirm_password">Confirm new password</label>
+        <input type="password" id="confirm_password" name="confirm_password" required minlength="10" autocomplete="new-password">
+      </div>
+      <button class="btn" type="submit">Update password</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

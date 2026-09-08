@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Changes — {{ organization.name }}{% endblock %}
+{% block body %}
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="org-name">
+      <strong>{{ organization.name }}</strong>
+      <span>{{ organization.primary_domain or "No confirmed domain" }}</span>
+    </div>
+    {% set active = "changes" %}
+    {% include "partials/nav.html" with context %}
+  </aside>
+  <div class="main-content">
+    <h1>Changes</h1>
+
+    {% if other_runs %}
+    <div class="toolbar">
+      <form method="get" action="/runs/{{ run.id }}/changes">
+        <label for="compare_to" class="visually-hidden">Compare to</label>
+        <select id="compare_to" name="compare_to" onchange="this.form.submit()">
+          {% for r in other_runs %}
+            <option value="{{ r.id }}" {% if previous and previous.id == r.id %}selected{% endif %}>
+              {{ r.created_at.strftime('%Y-%m-%d %H:%M') }}
+            </option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+    {% endif %}
+
+    {% if not previous %}
+      <div class="card empty-state">
+        <p>There's no earlier completed run for this organization to compare against yet.</p>
+      </div>
+    {% elif not entries %}
+      <div class="card empty-state">
+        <p>No additions, removals, or changes compared to the run from {{ previous.created_at.strftime('%Y-%m-%d %H:%M') }}.</p>
+      </div>
+    {% else %}
+      <p class="lead">Compared to the run from {{ previous.created_at.strftime('%Y-%m-%d %H:%M') }}. These are observed differences, not vulnerabilities.</p>
+      {% for entry in entries %}
+      <div class="result-card diff-{{ entry.status }}">
+        <div style="display:flex; justify-content:space-between; gap:12px;">
+          <strong>{{ (entry.current or entry.previous).title }}</strong>
+          <span class="badge {{ 'badge-success' if entry.status == 'added' else ('badge-error' if entry.status == 'removed' else 'badge-orange') }}">{{ entry.status }}</span>
+        </div>
+        <div class="meta"><span>{{ category_labels[entry.current.category if entry.current else entry.previous.category] }}</span></div>
+        {% if entry.status == "changed" %}
+          <p><strong>Before:</strong> {{ entry.previous.summary or entry.previous.title }}</p>
+          <p><strong>After:</strong> {{ entry.current.summary or entry.current.title }}</p>
+        {% elif entry.current and entry.current.summary %}
+          <p style="white-space:pre-line;">{{ entry.current.summary }}</p>
+        {% elif entry.previous and entry.previous.summary %}
+          <p style="white-space:pre-line;">{{ entry.previous.summary }}</p>
+        {% endif %}
+        {% set src = entry.current or entry.previous %}
+        <div class="meta">
+          <span>Source: {% if src.source_url %}<a href="{{ src.source_url }}" target="_blank" rel="noopener noreferrer">{{ src.source_name }}</a>{% else %}{{ src.source_name }}{% endif %}</span>
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

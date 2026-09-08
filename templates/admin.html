@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Admin — EthicalHawk Recon{% endblock %}
+{% block content %}
+<div class="container">
+  <h1>Administration</h1>
+  {% include "partials/flash.html" %}
+
+  <div class="card">
+    <h2>Users</h2>
+    <table>
+      <thead><tr><th>Email</th><th>Role</th><th>Active</th><th>Joined</th><th></th></tr></thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>{{ u.email }}</td>
+          <td>{{ u.role.value }}</td>
+          <td>{{ "Yes" if u.is_active else "No" }}</td>
+          <td>{{ u.created_at.strftime('%Y-%m-%d') }}</td>
+          <td style="display:flex; gap:6px;">
+            <form method="post" action="/admin/users/{{ u.id }}/role">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="role" value="{{ 'member' if u.role.value == 'administrator' else 'administrator' }}">
+              <button class="btn secondary small" type="submit">{{ "Make member" if u.role.value == "administrator" else "Make admin" }}</button>
+            </form>
+            <form method="post" action="/admin/users/{{ u.id }}/deactivate">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button class="btn secondary small" type="submit">{{ "Deactivate" if u.is_active else "Reactivate" }}</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Audit log</h2>
+    <table>
+      <thead><tr><th>When</th><th>Event</th><th>Description</th></tr></thead>
+      <tbody>
+        {% for e in events %}
+        <tr>
+          <td>{{ e.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td>{{ e.event_type }}</td>
+          <td>{{ e.description }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

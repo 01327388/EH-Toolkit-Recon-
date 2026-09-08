@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Saved runs — EthicalHawk Recon{% endblock %}
+{% block content %}
+<div class="container">
+  <h1>Saved runs</h1>
+  {% if not runs %}
+    <div class="card empty-state"><p>No runs yet. <a href="/">Start a search</a>.</p></div>
+  {% else %}
+    <div class="card">
+      <table>
+        <thead><tr><th>Organization</th><th>Mode</th><th>Status</th><th>Started</th><th></th></tr></thead>
+        <tbody>
+          {% for run in runs %}
+          <tr>
+            <td>{{ run.organization.name }}</td>
+            <td>{{ "Authorized Passive" if run.mode.value == "authorized_passive" else "Public Profile" }}</td>
+            <td><span class="badge {{ 'badge-success' if run.status.value == 'completed' else ('badge-error' if run.status.value == 'failed' else 'badge-muted') }}">{{ run.status.value }}</span></td>
+            <td>{{ run.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td><a href="/runs/{{ run.id }}">Open</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

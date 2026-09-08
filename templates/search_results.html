@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Results for "{{ query }}" — EthicalHawk Recon{% endblock %}
+{% block content %}
+<div class="container">
+  <h1>Results for &ldquo;{{ query }}&rdquo;</h1>
+  <p class="lead">Confirm the organization you intend to research. Nothing is collected until you confirm.</p>
+
+  {% if not candidates %}
+    <div class="card empty-state">
+      <p>No likely matches were found from public sources for that name.</p>
+      <a class="btn secondary" href="/">Try a different search</a>
+    </div>
+  {% else %}
+    {% for c in candidates %}
+    <div class="candidate-card">
+      <div>
+        <strong>{{ c.name }}</strong>
+        <div class="domain">{{ c.domain or "No public domain confirmed" }}</div>
+        <div class="field-hint">{{ c.rationale }} &middot; source: {{ c.source }}</div>
+      </div>
+      <div style="text-align:right; min-width:160px;">
+        <div class="badge badge-muted" style="margin-bottom:10px;">{{ (c.confidence * 100) | round | int }}% confidence</div><br>
+        <form method="post" action="/organizations/confirm">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="name" value="{{ c.name }}">
+          <input type="hidden" name="domain" value="{{ c.domain or '' }}">
+          <button class="btn small" type="submit">This is the one</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  {% endif %}
+
+  <a href="/">&larr; Search again</a>
+</div>
+{% endblock %}

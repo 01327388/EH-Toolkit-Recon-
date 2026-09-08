@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}{{ category_label }} — {{ organization.name }}{% endblock %}
+{% block body %}
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="org-name">
+      <strong>{{ organization.name }}</strong>
+      <span>{{ organization.primary_domain or "No confirmed domain" }}</span>
+    </div>
+    {% set active = category.value %}
+    {% include "partials/nav.html" with context %}
+  </aside>
+  <div class="main-content">
+    <h1>{{ category_label }}</h1>
+
+    <div class="toolbar">
+      <form method="get" action="/runs/{{ run.id }}/category/{{ category.value }}">
+        <label for="q" class="visually-hidden">Filter results</label>
+        <input type="search" id="q" name="q" value="{{ q }}" placeholder="Filter {{ category_label|lower }}...">
+        <label style="display:flex; align-items:center; gap:6px; font-weight:400;">
+          <input type="checkbox" name="show_hidden" value="true" {% if show_hidden %}checked{% endif %} style="width:auto;">
+          Show hidden
+        </label>
+        <button class="btn secondary small" type="submit">Apply</button>
+      </form>
+    </div>
+
+    {% if not results %}
+      <div class="card empty-state">
+        <p>No {{ category_label|lower }} results yet from permitted public sources.</p>
+        {% if run.status.value in ("pending", "running") %}<p class="field-hint">This run is still collecting data.</p>{% endif %}
+      </div>
+    {% else %}
+      {% for r in results %}
+      <div class="result-card">
+        <div style="display:flex; justify-content:space-between; gap:12px;">
+          <strong>{{ r.title }}{% if r.hidden %} <span class="badge badge-muted">hidden</span>{% endif %}</strong>
+          <span class="badge badge-muted">{{ (r.confidence * 100) | round | int }}% confidence</span>
+        </div>
+        {% if r.summary %}<p style="white-space:pre-line;">{{ r.summary }}</p>{% endif %}
+        <div class="meta">
+          <span>Source: {% if r.source_url %}<a href="{{ r.source_url }}" target="_blank" rel="noopener noreferrer">{{ r.source_name }}</a>{% else %}{{ r.source_name }}{% endif %}</span>
+          <span>Discovered {{ r.discovered_at.strftime('%Y-%m-%d %H:%M') }}</span>
+          {% if r.rationale %}<span>{{ r.rationale }}</span>{% endif %}
+          {% if r.hidden and r.hidden_reason %}<span>Hidden: {{ r.hidden_reason }}</span>{% endif %}
+        </div>
+
+        {% if r.notes %}
+          <div style="margin-top:8px;">
+            {% for note in r.notes %}
+              <div class="field-hint">{{ note.created_at.strftime('%Y-%m-%d %H:%M') }}: {{ note.body }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="actions">
+          <details>
+            <summary style="cursor:pointer; font-size:0.85rem;">Add note</summary>
+            <form method="post" action="/results/{{ r.id }}/notes" style="margin-top:8px;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <textarea name="body" placeholder="Analyst note..." required maxlength="4000"></textarea>
+              <button class="btn secondary small" type="submit">Save note</button>
+            </form>
+          </details>
+          {% if not r.hidden %}
+          <details>
+            <summary style="cursor:pointer; font-size:0.85rem;">Report / hide</summary>
+            <form method="post" action="/runs/{{ run.id }}/results/{{ r.id }}/hide" style="margin-top:8px;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="text" name="reason" placeholder="Why is this inaccurate?" required maxlength="500">
+              <button class="btn danger small" type="submit">Hide from my workspace</button>
+            </form>
+          </details>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
